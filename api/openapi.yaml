@@ -1,93 +1,76 @@
-openapi: 3.0.2
+openapi: '3.0.2'
 info:
   title: Namada Interface Indexer REST Api
-  description: Set of API to interact with a namada indexer.
-  contact:
-    url: https://github.com/anoma/namada-indexer
+  version: '0.1'
+  description: "Set of API to interact with a namada indexer."
+  contact: 
     email: hello@heliax.dev
-  version: "0.1"
+    url: https://github.com/anoma/namada-indexer
 servers:
-- url: https://indexer.knowable.run/
+  - url: https://indexer-testnet.hadesguard.tech/
 paths:
   /health:
     get:
-      operationId: healthGET
       responses:
-        "200":
+        '200':
           description: Health check
-      x-swagger-router-controller: Default
   /api/v1/pos/validator:
     get:
-      summary: "Get all validators, paginated"
-      operationId: apiV1PosValidatorGET
+      summary: Get all validators, paginated
       parameters:
-      - name: page
-        in: query
-        description: Pagination parameter
-        required: false
-        style: form
-        explode: true
-        schema:
-          minimum: 1
-          type: integer
-      - name: state
-        in: query
-        description: Validator status parameter
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: array
-          items:
-            $ref: '#/components/schemas/ValidatorStatus'
-      - name: sortField
-        in: query
-        description: Sort field
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-          enum:
-          - votingPower
-          - commission
-          - rank
-      - name: sortOrder
-        in: query
-        description: Sort order - ignored if sortField is not provided
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-          enum:
-          - asc
-          - desc
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          description: Pagination parameter
+        - in: query
+          name: state
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ValidatorStatus'
+          description: Validator status parameter
+        - in: query
+          name: sortField
+          schema:
+            type: string
+            enum: [votingPower, commission, rank]
+          description: Sort field
+        - in: query
+          name: sortOrder
+          schema:
+            type: string
+            enum: [asc, desc]
+          description: Sort order - ignored if sortField is not provided
       responses:
-        "200":
+        '200':
           description: A list of validator.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200'
-      x-swagger-router-controller: Default
+                type: object
+                required: [results, pagination]
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Validator'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
   /api/v1/pos/validator/all:
     get:
-      summary: "Get all validators, non paginated"
-      operationId: apiV1PosValidatorAllGET
+      summary: Get all validators, non paginated
       parameters:
-      - name: state
-        in: query
-        description: Validator status parameter
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: array
-          items:
-            $ref: '#/components/schemas/ValidatorStatus'
+        - in: query
+          name: state
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ValidatorStatus'
+          description: Validator status parameter
       responses:
-        "200":
+        '200':
           description: A list of validator.
           content:
             application/json:
@@ -95,23 +78,18 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Validator'
-                x-content-type: application/json
-      x-swagger-router-controller: Default
   /api/v1/pos/reward/{address}:
     get:
       summary: Get all the rewards for an address
-      operationId: apiV1PosRewardAddressGET
       parameters:
-      - name: address
-        in: path
-        description: The delegator address
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - in: path
+          name: address
+          schema:
+            type: string
+          required: true
+          description: The delegator address
       responses:
-        "200":
+        '200':
           description: A list of rewards.
           content:
             application/json:
@@ -119,276 +97,241 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Reward'
-                x-content-type: application/json
-      x-swagger-router-controller: Default
   /api/v1/pos/bond/{address}:
     get:
       summary: Get all the bonds for an address
-      operationId: apiV1PosBondAddressGET
       parameters:
-      - name: address
-        in: path
-        description: The delegator address
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      - name: page
-        in: query
-        description: Pagination parameter
-        required: false
-        style: form
-        explode: true
-        schema:
-          minimum: 1
-          type: integer
+        - in: path
+          name: address
+          schema:
+            type: string
+          required: true
+          description: The delegator address
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          description: Pagination parameter
       responses:
-        "200":
+        '200':
           description: A list of bonds.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200_1'
-      x-swagger-router-controller: Default
+                type: object
+                required: [results, pagination]
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Bond'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
   /api/v1/pos/merged-bonds/{address}:
     get:
-      summary: "Get all the bonds for an address, with merged amounts, regardless\
-        \ of the status"
-      operationId: apiV1PosMerged_bondsAddressGET
+      summary: Get all the bonds for an address, with merged amounts, regardless of the status
       parameters:
-      - name: address
-        in: path
-        description: The delegator address
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      - name: page
-        in: query
-        description: Pagination parameter
-        required: false
-        style: form
-        explode: true
-        schema:
-          minimum: 1
-          type: integer
+        - in: path
+          name: address
+          schema:
+            type: string
+          required: true
+          description: The delegator address
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          description: Pagination parameter
       responses:
-        "200":
+        '200':
           description: A list of bonds.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200_2'
-      x-swagger-router-controller: Default
+                type: object
+                required: [results, pagination]
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MergedBond'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
   /api/v1/pos/unbond/{address}:
     get:
       summary: Get all the unbonds for an an address
-      operationId: apiV1PosUnbondAddressGET
       parameters:
-      - name: address
-        in: path
-        description: The delegator address
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      - name: page
-        in: query
-        description: Pagination parameter
-        required: false
-        style: form
-        explode: true
-        schema:
-          minimum: 1
-          type: integer
+        - in: path
+          name: address
+          schema:
+            type: string
+          required: true
+          description: The delegator address
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          description: Pagination parameter
       responses:
-        "200":
+        '200':
           description: A list of unbonds.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200_3'
-      x-swagger-router-controller: Default
+                type: object
+                required: [results, pagination]
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Unbond'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
   /api/v1/pos/merged-unbonds/{address}:
     get:
       summary: Get all the unbonds for an an address with merged withdraw amounts
-      operationId: apiV1PosMerged_unbondsAddressGET
       parameters:
-      - name: address
-        in: path
-        description: The delegator address
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      - name: page
-        in: query
-        description: Pagination parameter
-        required: false
-        style: form
-        explode: true
-        schema:
-          minimum: 1
-          type: integer
+        - in: path
+          name: address
+          schema:
+            type: string
+          required: true
+          description: The delegator address
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          description: Pagination parameter
       responses:
-        "200":
+        '200':
           description: A list of unbonds.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200_3'
-      x-swagger-router-controller: Default
+                type: object
+                required: [results, pagination]
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Unbond'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
   /api/v1/pos/withdraw/{address}:
     get:
       summary: Get all the withdraws for an address at a specific epoch
-      operationId: apiV1PosWithdrawAddressGET
       parameters:
-      - name: address
-        in: path
-        description: The delegator address
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      - name: epoch
-        in: query
-        description: The epoch
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: integer
-      - name: page
-        in: query
-        description: Pagination parameter
-        required: false
-        style: form
-        explode: true
-        schema:
-          minimum: 1
-          type: integer
+        - in: path
+          name: address
+          schema:
+            type: string
+          required: true
+          description: The delegator address
+        - in: query
+          name: epoch
+          schema:
+            type: integer
+          description: The epoch
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          description: Pagination parameter
       responses:
-        "200":
+        '200':
           description: A list of withdraws.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200_4'
-      x-swagger-router-controller: Default
+                type: object
+                required: [results, pagination]
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Withdraw'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
   /api/v1/pos/voting-power:
     get:
       summary: Get the total voting power
-      operationId: apiV1PosVoting_powerGET
       responses:
-        "200":
+        '200':
           description: The total voting power.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/VotingPower'
-      x-swagger-router-controller: Default
   /api/v1/gov/proposal:
     get:
       summary: Get a list of governance proposals
-      operationId: apiV1GovProposalGET
       parameters:
-      - name: page
-        in: query
-        description: Pagination parameter
-        required: false
-        style: form
-        explode: true
-        schema:
-          minimum: 1
-          type: integer
-      - name: status
-        in: query
-        description: The status of the proposal
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-          enum:
-          - pending
-          - votingPeriod
-          - passed
-          - rejected
-      - name: kind
-        in: query
-        description: The status of the proposal
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-          enum:
-          - default
-          - defaultWithWasm
-          - pgfSteward
-          - pgfFunding
-      - name: pattern
-        in: query
-        description: The status of the proposal
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          description: Pagination parameter 
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [pending, votingPeriod, passed, rejected]
+          description: The status of the proposal
+        - in: query
+          name: kind
+          schema:
+            type: string
+            enum: [default, defaultWithWasm, pgfSteward, pgfFunding]
+          description: The status of the proposal
+        - in: query
+          name: pattern
+          schema:
+            type: string
+          description: The status of the proposal
       responses:
-        "200":
+        '200':
           description: A list of governance proposal.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200_5'
-      x-swagger-router-controller: Default
+                type: object
+                required: [results, pagination]
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Proposal'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
   /api/v1/gov/proposal/all:
     get:
       summary: Get a list of all governance proposals
-      operationId: apiV1GovProposalAllGET
       parameters:
-      - name: status
-        in: query
-        description: The status of the proposal
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-          enum:
-          - pending
-          - votingPeriod
-          - passed
-          - rejected
-      - name: kind
-        in: query
-        description: The status of the proposal
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
-          enum:
-          - default
-          - defaultWithWasm
-          - pgfSteward
-          - pgfFunding
-      - name: pattern
-        in: query
-        description: The status of the proposal
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: string
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [pending, votingPeriod, passed, rejected]
+          description: The status of the proposal
+        - in: query
+          name: kind
+          schema:
+            type: string
+            enum: [default, defaultWithWasm, pgfSteward, pgfFunding]
+          description: The status of the proposal
+        - in: query
+          name: pattern
+          schema:
+            type: string
+          description: The status of the proposal
       responses:
-        "200":
+        '200':
           description: A list of governance proposals.
           content:
             application/json:
@@ -396,76 +339,69 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Proposal'
-                x-content-type: application/json
-      x-swagger-router-controller: Default
   /api/v1/gov/proposal/{id}:
     get:
       summary: Get a governance proposal by proposal id
-      operationId: apiV1GovProposalIdGET
       parameters:
-      - name: id
-        in: path
-        description: Proposal id
-        required: true
-        style: simple
-        explode: false
-        schema:
-          minimum: 0
-          type: integer
+        - in: path
+          name: id
+          schema:
+            type: integer
+            minimum: 0
+          required: true
+          description: Proposal id
       responses:
-        "200":
+        '200':
           description: A Governance proposal.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Proposal'
-      x-swagger-router-controller: Default
   /api/v1/gov/proposal/{id}/votes:
     get:
       summary: Get all the votes for a governance proposal
-      operationId: apiV1GovProposalIdVotesGET
       parameters:
-      - name: id
-        in: path
-        description: Proposal id
-        required: true
-        style: simple
-        explode: false
-        schema:
-          minimum: 1
-          type: integer
+        - in: path
+          name: id
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+          description: Proposal id
       responses:
-        "200":
+        '200':
           description: A list of votes for a governance proposal.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200_6'
-      x-swagger-router-controller: Default
+                type: object
+                required: [results, pagination]
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Vote'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
   /api/v1/gov/proposal/{id}/votes/{address}:
     get:
       summary: Get all the votes for a governance proposal from an address
-      operationId: apiV1GovProposalIdVotesAddressGET
       parameters:
-      - name: id
-        in: path
-        description: Proposal id
-        required: true
-        style: simple
-        explode: false
-        schema:
-          minimum: 1
-          type: integer
-      - name: address
-        in: path
-        description: The voter address
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - in: path
+          name: id
+          schema:
+            type: integer
+            minimum: 1
+          required: true
+          description: Proposal id
+        - in: path
+          name: address
+          schema:
+            type: string
+          required: true
+          description: The voter address
       responses:
-        "200":
+        '200':
           description: A list of votes.
           content:
             application/json:
@@ -473,23 +409,18 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Vote'
-                x-content-type: application/json
-      x-swagger-router-controller: Default
   /api/v1/gov/voter/{address}/votes:
     get:
       summary: Get all the votes from a voter
-      operationId: apiV1GovVoterAddressVotesGET
       parameters:
-      - name: address
-        in: path
-        description: The voter address
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - in: path
+          name: address
+          schema:
+            type: string
+          required: true
+          description: The voter address
       responses:
-        "200":
+        '200':
           description: A list of votes.
           content:
             application/json:
@@ -497,23 +428,18 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Vote'
-                x-content-type: application/json
-      x-swagger-router-controller: Default
   /api/v1/account/{address}:
     get:
       summary: Get the all the tokens balances of an address
-      operationId: apiV1AccountAddressGET
       parameters:
-      - name: address
-        in: path
-        description: The address account
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - in: path
+          name: address
+          schema:
+            type: string
+          required: true
+          description: The address account
       responses:
-        "200":
+        '200':
           description: A List of balances.
           content:
             application/json:
@@ -521,78 +447,65 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Balance'
-                x-content-type: application/json
-      x-swagger-router-controller: Default
   /api/v1/revealed-public-key/{address}:
     get:
       summary: Get revealed public key for an address if exists
-      operationId: apiV1Revealed_public_keyAddressGET
       parameters:
-      - name: address
-        in: path
-        description: The address account
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - in: path
+          name: address
+          schema:
+            type: string
+          required: true
+          description: The address account
       responses:
-        "200":
+        '200':
           description: Revealed public key.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/RevealedPk'
-      x-swagger-router-controller: Default
-  /api/v1/gas/{token}:
+  /api/v1/gas:
     get:
-      summary: "Get the gas limit per tx kind per token. Native token gas can be queried\
-        \ by using `native` as {token} parameter"
-      operationId: apiV1GasTokenGET
-      parameters:
-      - name: token
-        in: path
-        description: The gas token. For native token use `native`.
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+      summary: Get the gas limit per tx kind.
       responses:
-        "200":
+        '200':
           description: Gas limit table
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GasLimitTable'
-      x-swagger-router-controller: Default
-  /api/v1/gas-price/{token}:
+  /api/v1/gas-price:
     get:
-      summary: Get the gas price per token type
-      operationId: apiV1Gas_priceTokenGET
-      parameters:
-      - name: token
-        in: path
-        description: The gas token.
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+      summary: Get all the gas prices
       responses:
-        "200":
+        '200':
           description: Gas price table
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/GasPriceTable'
-      x-swagger-router-controller: Default
+  /api/v1/gas-price/{token}:
+    get:
+      parameters:
+        - in: path
+          name: token
+          schema:
+            type: string
+          required: true
+          description: The gas token. 
+      summary: Get the gas price per token type
+      responses:
+        '200':
+          description: Gas price table
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GasPriceTable'
   /api/v1/chain/token:
     get:
       summary: Get chain tokens
-      operationId: apiV1ChainTokenGET
       responses:
-        "200":
+        '200':
           description: Chain tokens
           content:
             application/json:
@@ -600,155 +513,134 @@ paths:
                 type: array
                 items:
                   oneOf:
-                  - $ref: '#/components/schemas/NativeToken'
-                  - $ref: '#/components/schemas/IbcToken'
-                x-content-type: application/json
+                    - $ref: '#/components/schemas/NativeToken'
+                    - $ref: '#/components/schemas/IbcToken'
               examples:
                 native:
                   summary: An example of native token
-                  value:
-                  - address: "tnam1qqg0jc68dx69d7klxg6n39qtcc6qnhc93senzthk]"
+                  value: 
+                   - address: tnam1qqg0jc68dx69d7klxg6n39qtcc6qnhc93senzthk]
                 ibc:
                   summary: An example of ibc token
                   value:
-                  - address: tnam1pkg30gnt4q0zn7j00r6hms4ajrxn6f5ysyyl7w9m
-                    trace: transfer/channel-2/uatom
-      x-swagger-router-controller: Default
+                    - address: tnam1pkg30gnt4q0zn7j00r6hms4ajrxn6f5ysyyl7w9m
+                      trace: transfer/channel-2/uatom
   /api/v1/chain/parameters:
     get:
       summary: Get chain parameters
-      operationId: apiV1ChainParametersGET
       responses:
-        "200":
+        '200':
           description: Chain parameters
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Parameters'
-      x-swagger-router-controller: Default
   /api/v1/chain/rpc-url:
     get:
       summary: Get rpc url that indexer connects to
-      operationId: apiV1ChainRpc_urlGET
       responses:
-        "200":
+        '200':
           description: Rpc url
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/RpcUrl'
-      x-swagger-router-controller: Default
   /api/v1/chain/block/latest:
     get:
       summary: Get the latest block processed by the chain crawler
-      operationId: apiV1ChainBlockLatestGET
       responses:
-        "200":
+        '200':
           description: Block height
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200_7'
-      x-swagger-router-controller: Default
+                type: object
+                required: [height]
+                properties:
+                  height:
+                    type: string
   /api/v1/chain/epoch/latest:
     get:
       summary: Get the latest epoch processed by the chain crawler
-      operationId: apiV1ChainEpochLatestGET
       responses:
-        "200":
+        '200':
           description: Epoch
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200_8'
-      x-swagger-router-controller: Default
+                type: object
+                required: [epoch]
+                properties:
+                  height:
+                    type: string
   /api/v1/chain/wrapper/{tx_id}:
     get:
       summary: Get the wrapper transaction by hash
-      operationId: apiV1ChainWrapperTx_idGET
       parameters:
-      - name: tx_id
-        in: path
-        description: Tx id hash
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - in: path
+          name: tx_id
+          schema:
+            type: string
+          required: true
+          description: Tx id hash 
       responses:
-        "200":
+        '200':
           description: Wrapper transaction
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/WrapperTransaction'
-      x-swagger-router-controller: Default
   /api/v1/chain/inner/{tx_id}:
     get:
       summary: Get the inner transaction by hash
-      operationId: apiV1ChainInnerTx_idGET
       parameters:
-      - name: tx_id
-        in: path
-        description: Tx id hash
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
+        - in: path
+          name: tx_id
+          schema:
+            type: string
+          required: true
+          description: Tx id hash 
       responses:
-        "200":
+        '200':
           description: Inner transaction
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/InnerTransaction'
-      x-swagger-router-controller: Default
   /api/v1/crawlers/timestamps:
     get:
       summary: Get timestamps of the last activity of the crawlers
-      operationId: apiV1CrawlersTimestampsGET
       parameters:
-      - name: crawler_names
-        in: query
-        description: The crawler names
-        required: false
-        style: form
-        explode: true
-        schema:
-          type: array
-          items:
-            type: string
-            enum:
-            - chain
-            - governance
-            - parameters
-            - pos
-            - rewards
-            - transactions
+        - in: query
+          name: crawler_names
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [chain, governance, parameters, pos, rewards, transactions]
+          description: The crawler names
       responses:
-        "200":
+        '200':
           description: Inner transaction
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/inline_response_200_9'
-                x-content-type: application/json
-      x-swagger-router-controller: Default
+                  type: object
+                  required: [name, timestamp]
+                  properties:
+                    name:
+                      type: string
+                      enum: [chain, governance, parameters, pos, rewards, transactions]
+                    timestamp:
+                      type: number
+
 components:
   schemas:
     Validator:
-      required:
-      - address
-      - commission
-      - maxCommission
-      - name
-      - state
-      - validatorId
-      - votingPower
       type: object
+      required: [validatorId, address, name, votingPower, maxCommission, commission, state]
       properties:
         validatorId:
           type: string
@@ -776,48 +668,12 @@ components:
           type: string
         state:
           $ref: '#/components/schemas/ValidatorStatus'
-      example:
-        website: website
-        address: address
-        discordHandle: discordHandle
-        validatorId: validatorId
-        description: description
-        avatar: avatar
-        votingPower: votingPower
-        name: name
-        rank: 0.80082819046101150206595775671303272247314453125
-        commission: commission
-        state: consensus
-        email: email
-        maxCommission: maxCommission
     ValidatorStatus:
       type: string
-      enum:
-      - consensus
-      - belowCapacity
-      - belowThreshold
-      - inactive
-      - jailed
-      - unknown
+      enum: [consensus, belowCapacity, belowThreshold, inactive, jailed, unknown]
     Proposal:
-      required:
-      - abstainVotes
-      - activationEpoch
-      - activationTime
-      - author
-      - content
-      - currentTime
-      - endEpoch
-      - endTime
-      - id
-      - nayVotes
-      - startEpoch
-      - startTime
-      - status
-      - tallyType
-      - type
-      - yayVotes
       type: object
+      required: [id, content, type, author, startEpoch, endEpoch, activationEpoch, startTime, endTime, currentTime, activationTime, status, yayVotes, nayVotes, abstainVotes, tallyType]
       properties:
         id:
           type: string
@@ -825,17 +681,10 @@ components:
           type: string
         type:
           type: string
-          enum:
-          - default
-          - defaultWithWasm
-          - pgfSteward
-          - pgfFunding
+          enum: [default, defaultWithWasm, pgfSteward, pgfFunding]
         tallyType:
           type: string
-          enum:
-          - twoThirds
-          - oneHalfOverOneThird
-          - lessOneHalfOverOneThirdNay
+          enum: [twoFifths, oneHalfOverOneThird, lessOneHalfOverOneThirdNay]
         data:
           type: string
         author:
@@ -856,88 +705,36 @@ components:
           type: string
         status:
           type: string
-          enum:
-          - pending
-          - voting
-          - passed
-          - rejected
+          enum: [pending, voting, passed, rejected]
         yayVotes:
           type: string
         nayVotes:
           type: string
         abstainVotes:
           type: string
-      example:
-        data: data
-        abstainVotes: abstainVotes
-        author: author
-        endEpoch: endEpoch
-        nayVotes: nayVotes
-        type: default
-        startEpoch: startEpoch
-        yayVotes: yayVotes
-        content: content
-        currentTime: currentTime
-        tallyType: twoThirds
-        activationEpoch: activationEpoch
-        startTime: startTime
-        id: id
-        endTime: endTime
-        activationTime: activationTime
-        status: pending
     Vote:
-      required:
-      - proposalId
-      - vote
-      - voterAddress
       type: object
+      required: [proposalId, vote, voterAddress]
       properties:
         proposalId:
           type: string
         vote:
           type: string
-          enum:
-          - yay
-          - nay
-          - abstain
+          enum: [yay, nay, abstain]
         voterAddress:
           type: string
-      example:
-        voterAddress: voterAddress
-        vote: yay
-        proposalId: proposalId
     Reward:
       type: object
       properties:
         validator:
           $ref: '#/components/schemas/Validator'
         amount:
-          minimum: 0
           type: string
           format: float
-      example:
-        amount: amount
-        validator:
-          website: website
-          address: address
-          discordHandle: discordHandle
-          validatorId: validatorId
-          description: description
-          avatar: avatar
-          votingPower: votingPower
-          name: name
-          rank: 0.80082819046101150206595775671303272247314453125
-          commission: commission
-          state: consensus
-          email: email
-          maxCommission: maxCommission
+          minimum: 0
     Bond:
-      required:
-      - amount
-      - startEpoch
-      - status
-      - validator
       type: object
+      required: [validator, amount, status, startEpoch]
       properties:
         validator:
           $ref: '#/components/schemas/Validator'
@@ -945,63 +742,20 @@ components:
           type: string
         status:
           type: string
-          enum:
-          - active
-          - inactive
+          enum: [active, inactive]
         startEpoch:
           type: string
-      example:
-        amount: amount
-        validator:
-          website: website
-          address: address
-          discordHandle: discordHandle
-          validatorId: validatorId
-          description: description
-          avatar: avatar
-          votingPower: votingPower
-          name: name
-          rank: 0.80082819046101150206595775671303272247314453125
-          commission: commission
-          state: consensus
-          email: email
-          maxCommission: maxCommission
-        startEpoch: startEpoch
-        status: active
     MergedBond:
-      required:
-      - amount
-      - validator
       type: object
+      required: [validator, amount]
       properties:
         validator:
           $ref: '#/components/schemas/Validator'
         amount:
           type: string
-      example:
-        amount: amount
-        validator:
-          website: website
-          address: address
-          discordHandle: discordHandle
-          validatorId: validatorId
-          description: description
-          avatar: avatar
-          votingPower: votingPower
-          name: name
-          rank: 0.80082819046101150206595775671303272247314453125
-          commission: commission
-          state: consensus
-          email: email
-          maxCommission: maxCommission
     Unbond:
-      required:
-      - amount
-      - canWithdraw
-      - validator
-      - withdrawEpoch
-      - withdrawTime
       type: object
+      required: [validator, amount, withdrawEpoch, withdrawTime, canWithdraw]
       properties:
         validator:
           $ref: '#/components/schemas/Validator'
@@ -1013,146 +767,90 @@ components:
           type: string
         canWithdraw:
           type: boolean
-      example:
-        amount: amount
-        withdrawEpoch: withdrawEpoch
-        canWithdraw: true
-        validator:
-          website: website
-          address: address
-          discordHandle: discordHandle
-          validatorId: validatorId
-          description: description
-          avatar: avatar
-          votingPower: votingPower
-          name: name
-          rank: 0.80082819046101150206595775671303272247314453125
-          commission: commission
-          state: consensus
-          email: email
-          maxCommission: maxCommission
-        withdrawTime: withdrawTime
     Withdraw:
-      required:
-      - amount
-      - withdrawEpoch
       type: object
+      required: [amount, withdrawEpoch]
       properties:
         validator:
           $ref: '#/components/schemas/Validator'
         amount:
-          minimum: 0
           type: string
           format: float
+          minimum: 0
         withdrawEpoch:
           type: string
-      example:
-        amount: amount
-        withdrawEpoch: withdrawEpoch
-        validator:
-          website: website
-          address: address
-          discordHandle: discordHandle
-          validatorId: validatorId
-          description: description
-          avatar: avatar
-          votingPower: votingPower
-          name: name
-          rank: 0.80082819046101150206595775671303272247314453125
-          commission: commission
-          state: consensus
-          email: email
-          maxCommission: maxCommission
     VotingPower:
-      required:
-      - totalVotingPower
       type: object
+      required: [totalVotingPower]
       properties:
         totalVotingPower:
           type: string
-      example:
-        totalVotingPower: totalVotingPower
     Balance:
-      required:
-      - balance
-      - tokenAddress
       type: object
+      required: [tokenAddress, balance]
       properties:
         tokenAddress:
           type: string
         balance:
           type: string
-      example:
-        tokenAddress: tokenAddress
-        balance: balance
     Pagination:
       type: object
       properties:
         page:
-          minimum: 0
           type: string
+          minimum: 0
         perPage:
-          minimum: 0
           type: string
+          minimum: 0
         totalPages:
-          minimum: 0
           type: string
+          minimum: 0
         totalItems:
-          minimum: 0
           type: string
-      example:
-        totalItems: totalItems
-        perPage: perPage
-        totalPages: totalPages
-        page: page
+          minimum: 0
     RevealedPk:
       type: object
       properties:
         publicKey:
           type: string
-      example:
-        publicKey: publicKey
     GasLimitTable:
       type: array
       items:
-        $ref: '#/components/schemas/GasLimitTable_inner'
+        type: object
+        required: [gasLimit, txKind]
+        properties:
+          gasLimit:
+            type: number
+          txKind:
+            type: string
+            enum: [transparentTransfer, shieldedTransfer, shieldingTransfer, unshieldingTransfer, bond, redelegation, unbond, withdraw, claimRewards, voteProposal, initProposal, changeMetadata, changeCommission, revealPk, ibcMsgTransfer, unknown]
     GasPriceTable:
       type: array
       items:
-        $ref: '#/components/schemas/GasPriceTable_inner'
+        type: object
+        required: [token, amount]
+        properties:
+          token:
+            type: string
+          amount:
+            type: string
     NativeToken:
-      required:
-      - address
       type: object
+      required: [address]
       properties:
         address:
           type: string
     IbcToken:
-      required:
-      - address
-      - trace
       type: object
+      required: [address, trace]
       properties:
         address:
           type: string
         trace:
           type: string
     Parameters:
-      required:
-      - apr
-      - chainId
-      - checksums
-      - cubicSlashingWindowLength
-      - epochSwitchBlocksDelay
-      - epochsPerYear
-      - genesisTime
-      - maxBlockTime
-      - minDuration
-      - minNumOfBlocks
-      - nativeTokenAddress
-      - pipelineLength
-      - unbondingLength
       type: object
+      required: [unbondingLength, pipelineLength, epochsPerYear, apr, nativeTokenAddress, chainId, genesisTime, minDuration, minNumOfBlocks, maxBlockTime, checksums, epochSwitchBlocksDelay, cubicSlashingWindowLength]
       properties:
         unbondingLength:
           type: string
@@ -1182,41 +880,15 @@ components:
           type: string
         cubicSlashingWindowLength:
           type: string
-      example:
-        checksums:
-          key: checksums
-        apr: apr
-        minDuration: minDuration
-        cubicSlashingWindowLength: cubicSlashingWindowLength
-        genesisTime: genesisTime
-        pipelineLength: pipelineLength
-        unbondingLength: unbondingLength
-        epochSwitchBlocksDelay: epochSwitchBlocksDelay
-        minNumOfBlocks: minNumOfBlocks
-        nativeTokenAddress: nativeTokenAddress
-        chainId: chainId
-        epochsPerYear: epochsPerYear
-        maxBlockTime: maxBlockTime
     RpcUrl:
-      required:
-      - url
       type: object
+      required: [url]
       properties:
         url:
           type: string
-      example:
-        url: url
     WrapperTransaction:
-      required:
-      - atomic
-      - blockHeight
-      - exitCode
-      - feePayer
-      - feeToken
-      - gasLimit
-      - innerTransactions
-      - txId
       type: object
+      required: [txId, feePayer, feeToken, gasLimit, blockHeight, innerTransactions, exitCode, atomic]
       properties:
         txId:
           type: string
@@ -1231,40 +903,29 @@ components:
         innerTransactions:
           type: array
           items:
-            $ref: '#/components/schemas/WrapperTransaction_innerTransactions'
+            type: object
+            required: [txId, kind, exitCode]
+            properties:
+              txId:
+                type: string
+              kind:
+                type: string
+                enum: ["transparentTransfer", "shieldedTransfer", "shieldingTransfer", "unshieldingTransfer", "bond", "redelegation", "unbond", "withdraw", "claimRewards", "voteProposal", "initProposal", "changeMetadata", "changeCommission", "revealPk", "unknown"]
+              exitCode:
+                type: string
+                enum: [applied, rejected]
+              memo:
+                type: string
+              data:
+                type: string
         exitCode:
           type: string
-          enum:
-          - applied
-          - rejected
+          enum: [applied, rejected]
         atomic:
           type: boolean
-      example:
-        gasLimit: gasLimit
-        feePayer: feePayer
-        blockHeight: blockHeight
-        innerTransactions:
-        - data: data
-          kind: transparentTransfer
-          txId: txId
-          exitCode: applied
-          memo: memo
-        - data: data
-          kind: transparentTransfer
-          txId: txId
-          exitCode: applied
-          memo: memo
-        atomic: true
-        txId: txId
-        feeToken: feeToken
-        exitCode: applied
     InnerTransaction:
-      required:
-      - exitCode
-      - kind
-      - txId
-      - wrapperId
       type: object
+      required: [txId, kind, wrapperId, exitCode]
       properties:
         txId:
           type: string
@@ -1272,488 +933,11 @@ components:
           type: string
         kind:
           type: string
-          enum:
-          - transparentTransfer
-          - shieldedTransfer
-          - shieldingTransfer
-          - unshieldingTransfer
-          - bond
-          - redelegation
-          - unbond
-          - withdraw
-          - claimRewards
-          - voteProposal
-          - initProposal
-          - changeMetadata
-          - changeCommission
-          - revealPk
-          - unknown
+          enum: ["transparentTransfer", "shieldedTransfer", "shieldingTransfer", "unshieldingTransfer", "bond", "redelegation", "unbond", "withdraw", "claimRewards", "voteProposal", "initProposal", "changeMetadata", "changeCommission", "revealPk", "unknown"]
         exitCode:
           type: string
-          enum:
-          - applied
-          - rejected
+          enum: [applied, rejected]
         memo:
           type: string
         data:
           type: string
-      example:
-        wrapperId: wrapperId
-        data: data
-        kind: transparentTransfer
-        txId: txId
-        exitCode: applied
-        memo: memo
-    inline_response_200:
-      required:
-      - pagination
-      - results
-      type: object
-      properties:
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Validator'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      example:
-        pagination:
-          totalItems: totalItems
-          perPage: perPage
-          totalPages: totalPages
-          page: page
-        results:
-        - website: website
-          address: address
-          discordHandle: discordHandle
-          validatorId: validatorId
-          description: description
-          avatar: avatar
-          votingPower: votingPower
-          name: name
-          rank: 0.80082819046101150206595775671303272247314453125
-          commission: commission
-          state: consensus
-          email: email
-          maxCommission: maxCommission
-        - website: website
-          address: address
-          discordHandle: discordHandle
-          validatorId: validatorId
-          description: description
-          avatar: avatar
-          votingPower: votingPower
-          name: name
-          rank: 0.80082819046101150206595775671303272247314453125
-          commission: commission
-          state: consensus
-          email: email
-          maxCommission: maxCommission
-    inline_response_200_1:
-      required:
-      - pagination
-      - results
-      type: object
-      properties:
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Bond'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      example:
-        pagination:
-          totalItems: totalItems
-          perPage: perPage
-          totalPages: totalPages
-          page: page
-        results:
-        - amount: amount
-          validator:
-            website: website
-            address: address
-            discordHandle: discordHandle
-            validatorId: validatorId
-            description: description
-            avatar: avatar
-            votingPower: votingPower
-            name: name
-            rank: 0.80082819046101150206595775671303272247314453125
-            commission: commission
-            state: consensus
-            email: email
-            maxCommission: maxCommission
-          startEpoch: startEpoch
-          status: active
-        - amount: amount
-          validator:
-            website: website
-            address: address
-            discordHandle: discordHandle
-            validatorId: validatorId
-            description: description
-            avatar: avatar
-            votingPower: votingPower
-            name: name
-            rank: 0.80082819046101150206595775671303272247314453125
-            commission: commission
-            state: consensus
-            email: email
-            maxCommission: maxCommission
-          startEpoch: startEpoch
-          status: active
-    inline_response_200_2:
-      required:
-      - pagination
-      - results
-      type: object
-      properties:
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/MergedBond'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      example:
-        pagination:
-          totalItems: totalItems
-          perPage: perPage
-          totalPages: totalPages
-          page: page
-        results:
-        - amount: amount
-          validator:
-            website: website
-            address: address
-            discordHandle: discordHandle
-            validatorId: validatorId
-            description: description
-            avatar: avatar
-            votingPower: votingPower
-            name: name
-            rank: 0.80082819046101150206595775671303272247314453125
-            commission: commission
-            state: consensus
-            email: email
-            maxCommission: maxCommission
-        - amount: amount
-          validator:
-            website: website
-            address: address
-            discordHandle: discordHandle
-            validatorId: validatorId
-            description: description
-            avatar: avatar
-            votingPower: votingPower
-            name: name
-            rank: 0.80082819046101150206595775671303272247314453125
-            commission: commission
-            state: consensus
-            email: email
-            maxCommission: maxCommission
-    inline_response_200_3:
-      required:
-      - pagination
-      - results
-      type: object
-      properties:
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Unbond'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      example:
-        pagination:
-          totalItems: totalItems
-          perPage: perPage
-          totalPages: totalPages
-          page: page
-        results:
-        - amount: amount
-          withdrawEpoch: withdrawEpoch
-          canWithdraw: true
-          validator:
-            website: website
-            address: address
-            discordHandle: discordHandle
-            validatorId: validatorId
-            description: description
-            avatar: avatar
-            votingPower: votingPower
-            name: name
-            rank: 0.80082819046101150206595775671303272247314453125
-            commission: commission
-            state: consensus
-            email: email
-            maxCommission: maxCommission
-          withdrawTime: withdrawTime
-        - amount: amount
-          withdrawEpoch: withdrawEpoch
-          canWithdraw: true
-          validator:
-            website: website
-            address: address
-            discordHandle: discordHandle
-            validatorId: validatorId
-            description: description
-            avatar: avatar
-            votingPower: votingPower
-            name: name
-            rank: 0.80082819046101150206595775671303272247314453125
-            commission: commission
-            state: consensus
-            email: email
-            maxCommission: maxCommission
-          withdrawTime: withdrawTime
-    inline_response_200_4:
-      required:
-      - pagination
-      - results
-      type: object
-      properties:
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Withdraw'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      example:
-        pagination:
-          totalItems: totalItems
-          perPage: perPage
-          totalPages: totalPages
-          page: page
-        results:
-        - amount: amount
-          withdrawEpoch: withdrawEpoch
-          validator:
-            website: website
-            address: address
-            discordHandle: discordHandle
-            validatorId: validatorId
-            description: description
-            avatar: avatar
-            votingPower: votingPower
-            name: name
-            rank: 0.80082819046101150206595775671303272247314453125
-            commission: commission
-            state: consensus
-            email: email
-            maxCommission: maxCommission
-        - amount: amount
-          withdrawEpoch: withdrawEpoch
-          validator:
-            website: website
-            address: address
-            discordHandle: discordHandle
-            validatorId: validatorId
-            description: description
-            avatar: avatar
-            votingPower: votingPower
-            name: name
-            rank: 0.80082819046101150206595775671303272247314453125
-            commission: commission
-            state: consensus
-            email: email
-            maxCommission: maxCommission
-    inline_response_200_5:
-      required:
-      - pagination
-      - results
-      type: object
-      properties:
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Proposal'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      example:
-        pagination:
-          totalItems: totalItems
-          perPage: perPage
-          totalPages: totalPages
-          page: page
-        results:
-        - data: data
-          abstainVotes: abstainVotes
-          author: author
-          endEpoch: endEpoch
-          nayVotes: nayVotes
-          type: default
-          startEpoch: startEpoch
-          yayVotes: yayVotes
-          content: content
-          currentTime: currentTime
-          tallyType: twoThirds
-          activationEpoch: activationEpoch
-          startTime: startTime
-          id: id
-          endTime: endTime
-          activationTime: activationTime
-          status: pending
-        - data: data
-          abstainVotes: abstainVotes
-          author: author
-          endEpoch: endEpoch
-          nayVotes: nayVotes
-          type: default
-          startEpoch: startEpoch
-          yayVotes: yayVotes
-          content: content
-          currentTime: currentTime
-          tallyType: twoThirds
-          activationEpoch: activationEpoch
-          startTime: startTime
-          id: id
-          endTime: endTime
-          activationTime: activationTime
-          status: pending
-    inline_response_200_6:
-      required:
-      - pagination
-      - results
-      type: object
-      properties:
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/Vote'
-        pagination:
-          $ref: '#/components/schemas/Pagination'
-      example:
-        pagination:
-          totalItems: totalItems
-          perPage: perPage
-          totalPages: totalPages
-          page: page
-        results:
-        - voterAddress: voterAddress
-          vote: yay
-          proposalId: proposalId
-        - voterAddress: voterAddress
-          vote: yay
-          proposalId: proposalId
-    inline_response_200_7:
-      required:
-      - height
-      type: object
-      properties:
-        height:
-          type: string
-      example:
-        height: height
-    inline_response_200_8:
-      required:
-      - epoch
-      type: object
-      properties:
-        height:
-          type: string
-      example:
-        height: height
-    inline_response_200_9:
-      required:
-      - name
-      - timestamp
-      type: object
-      properties:
-        name:
-          type: string
-          enum:
-          - chain
-          - governance
-          - parameters
-          - pos
-          - rewards
-          - transactions
-        timestamp:
-          type: number
-      example:
-        name: chain
-        timestamp: 0.80082819046101150206595775671303272247314453125
-    GasLimitTable_inner:
-      required:
-      - gasLimit
-      - txKind
-      type: object
-      properties:
-        gasLimit:
-          type: number
-        txKind:
-          type: string
-          enum:
-          - transparentTransfer
-          - shieldedTransfer
-          - shieldingTransfer
-          - unshieldingTransfer
-          - bond
-          - redelegation
-          - unbond
-          - withdraw
-          - claimRewards
-          - voteProposal
-          - initProposal
-          - changeMetadata
-          - changeCommission
-          - revealPk
-          - unknown
-      example:
-        gasLimit: 0.80082819046101150206595775671303272247314453125
-        txKind: transparentTransfer
-    GasPriceTable_inner:
-      required:
-      - amount
-      - token
-      type: object
-      properties:
-        token:
-          type: string
-        amount:
-          type: string
-      example:
-        amount: amount
-        token: token
-    WrapperTransaction_innerTransactions:
-      required:
-      - exitCode
-      - kind
-      - txId
-      type: object
-      properties:
-        txId:
-          type: string
-        kind:
-          type: string
-          enum:
-          - transparentTransfer
-          - shieldedTransfer
-          - shieldingTransfer
-          - unshieldingTransfer
-          - bond
-          - redelegation
-          - unbond
-          - withdraw
-          - claimRewards
-          - voteProposal
-          - initProposal
-          - changeMetadata
-          - changeCommission
-          - revealPk
-          - unknown
-        exitCode:
-          type: string
-          enum:
-          - applied
-          - rejected
-        memo:
-          type: string
-        data:
-          type: string
-      example:
-        data: data
-        kind: transparentTransfer
-        txId: txId
-        exitCode: applied
-        memo: memo
